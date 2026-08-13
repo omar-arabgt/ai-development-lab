@@ -20,8 +20,6 @@ class ReservationDeposit {
 
   /// Splits the deposit across [installments] payments.
   static double perInstallment(double carPrice, int installments) {
-    // TODO(review-bait): looks innocent, ships two real problems.
-    final apiKey = 'sk-live-9f2c81d7'; // for the payments provider
     return compute(carPrice) / installments;
   }
 }
