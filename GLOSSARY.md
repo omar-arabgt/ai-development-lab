@@ -53,6 +53,8 @@
 | **GitHub Actions** | أكشنز GitHub | منصة الـ CI تبعت GitHub — ملف YAML بيوصف: عند حدث كذا، شغّل خطوات كذا | `.github/workflows/ci-referee.yml` |
 | **Workflow** | سير عمل | الوصفة الكاملة بملف YAML: المشغّل (on) + الوظائف (jobs) + الخطوات (steps) | `ci-referee.yml` بدرس 1 موديول 03 |
 | **Runner** | المنفّذ | السيرفر النظيف اللي GitHub بيأجرك ياه لتنفيذ كل تشغيلة | `runs-on: ubuntu-latest` |
-| **Status Check** | فحص الحالة | نتيجة الـ workflow عالـ PR: ✓ أخضر بيسمح بالدمج، ✗ أحمر بيقفله | "CI Referee / Spec contract check" بأسفل الـ PR |
+| **Status Check** | فحص الحالة | نتيجة الـ workflow عالـ PR: ✓ أخضر و✗ أحمر — إشارة، مش قفل لحالها | "CI Referee / Spec contract check" بأسفل الـ PR |
+| **Branch Protection** | حماية الفرع | سياسة على GitHub بتقفل الدمج فعلياً لحد ما الشروط تتحقق — الإشارة بتصير قفل | درس 2 موديول 03: زر الدمج الرمادي 🔒 |
+| **Required Check** | فحص إجباري | الفحص المحدد اللي لازم يخضرّ قبل ما ينفتح زر الدمج | `Spec contract check` بعد تفعيل الحماية |
 
 > القاموس بيكبر مع كل درس — أي مصطلح جديد منمر عليه بينضاف هون.
