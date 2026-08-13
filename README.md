@@ -15,8 +15,8 @@
 | # | الموديول | الوصف | الحالة |
 |---|----------|-------|--------|
 | 00 | [أساسيات Claude Code](00-claude-code-fundamentals/) | Hooks, Subagents, Skills, CLAUDE.md, Permissions — الأساس لكل شي بعده | ✅ |
-| 01 | [Parallel Agents + Worktrees](01-parallel-agents-worktrees/) | عدة agents يشتغلوا بالتوازي على نفس الريبو بدون تعارض | 🔨 |
-| 02 | [Spec-Driven Development](02-spec-driven-development/) | من spec مكتوب → كود كامل مع tests | ⏳ |
+| 01 | [Parallel Agents + Worktrees](01-parallel-agents-worktrees/) | عدة agents يشتغلوا بالتوازي على نفس الريبو بدون تعارض | ✅ |
+| 02 | [Spec-Driven Development](02-spec-driven-development/) | من spec مكتوب → كود كامل مع tests | 🔨 |
 | 03 | [PR Review أوتوماتيك](03-pr-review-automation/) | كل PR بينفتح → review تلقائي (GitHub Actions) | ⏳ |
 | 04 | [Sentry Auto-Fix](04-sentry-autofix/) | Bug يوصل من Sentry → agent يحلل ويصلّح ويفتح PR | ⏳ |
 | 05 | [Linear Triage](05-linear-triage/) | تصنيف وترتيب التذاكر الجديدة تلقائياً | ⏳ |

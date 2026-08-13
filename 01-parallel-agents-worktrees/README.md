@@ -1,6 +1,6 @@
 # موديول 01: Parallel Agents + Worktrees
 
-> 🔨 شغالين عليه
+> ✅ خلص + الديمو مجرّب + موثّق
 
 كذا agent يشتغلوا بالتوازي على نفس الريبو بدون ما يتعارضوا — قلب فكرة الـ "AI Factory".
 
@@ -11,7 +11,7 @@
 | 1 | [Git Worktrees — مكاتب منفصلة](lesson-1-worktree-basics/) | نسخ معزولة من نفس المشروع، كل وحدة على branch خاص فيها | ✅ مثبت بالتجربة |
 | 2 | [Merge Conflicts — التعارض وحله](lesson-2-merge-conflicts/) | شو بيصير لما تاسكين يلمسوا نفس الملف، وكيف تحلها وتتجنبها | ✅ مثبت بالتجربة |
 | 3 | [Orchestration — المايسترو](lesson-3-orchestration/) | جلسة Claude وحدة بتفتح worktrees وبتطلق agents بالتوازي وبتدمج لحالها | ✅ مثبت بالتجربة |
-| 4 | [الأوركسترا كـ Skill](lesson-4-orchestration-skill/) | برومبت المايسترو بيتحول لإجراء ثابت `/parallel-tasks` بسياسة أمان مخبوزة جواه | 🔨 |
+| 4 | [الأوركسترا كـ Skill](lesson-4-orchestration-skill/) | برومبت المايسترو بيتحول لإجراء ثابت `/parallel-tasks` بسياسة أمان مخبوزة جواه | ✅ مثبت بالتجربة |
 
 ## ليش هاد الترتيب؟
 
