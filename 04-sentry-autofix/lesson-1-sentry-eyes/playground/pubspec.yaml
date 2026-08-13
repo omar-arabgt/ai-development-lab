@@ -1,0 +1,7 @@
+name: sentry_playground
+description: Tiny console app that reports a planted crash to Sentry.
+publish_to: none
+environment:
+  sdk: ^3.0.0
+dependencies:
+  sentry: ^9.0.0

@@ -1,2 +1,6 @@
 # Ephemeral git worktrees created during lesson exercises — not meant to be committed
 01-parallel-agents-worktrees/*/playground-worktrees/
+
+# Dart tooling artifacts in lesson playgrounds
+**/.dart_tool/
+**/.DS_Store
