@@ -4,7 +4,5 @@ class SearchFilters {
   /// TASK B: add a 'year' entry to the list below (after 'brand').
   /// NOTE: both tasks touch the SAME lines — that is the point of
   /// this exercise.
-  static const List<String> defaultFilters = [
-    'brand',
-  ];
+  static const List<String> defaultFilters = ['brand', 'price', 'year'];
 }

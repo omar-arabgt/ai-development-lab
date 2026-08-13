@@ -4,6 +4,23 @@ class CurrencyFormatter {
   /// separator and the "JOD" suffix, e.g. 12500 -> "12,500 JOD".
   /// Negative amounts should throw an ArgumentError.
   static String format(num amountInJod) {
-    throw UnimplementedError('TODO: implement CurrencyFormatter.format');
+    if (amountInJod < 0) {
+      throw ArgumentError.value(
+        amountInJod,
+        'amountInJod',
+        'must not be negative',
+      );
+    }
+
+    final digits = amountInJod.toInt().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) {
+        buffer.write(',');
+      }
+      buffer.write(digits[i]);
+    }
+
+    return '$buffer JOD';
   }
 }

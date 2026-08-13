@@ -8,6 +8,9 @@ class FuelCostEstimator {
     double litersPer100Km,
     double pricePerLiter,
   ) {
-    throw UnimplementedError('TODO: implement FuelCostEstimator.monthlyCost');
+    if (kmPerMonth < 0 || litersPer100Km < 0 || pricePerLiter < 0) {
+      throw ArgumentError('Inputs must not be negative');
+    }
+    return (kmPerMonth / 100) * litersPer100Km * pricePerLiter;
   }
 }

@@ -4,6 +4,6 @@ class PlateValidator {
   /// (2 digits, a dash, then 5 digits), e.g. "10-12345".
   /// Anything else (wrong lengths, letters, missing dash) returns false.
   static bool isValid(String plate) {
-    throw UnimplementedError('TODO: implement PlateValidator.isValid');
+    return RegExp(r'^\d{2}-\d{5}$').hasMatch(plate);
   }
 }
