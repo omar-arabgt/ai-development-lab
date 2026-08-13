@@ -59,6 +59,12 @@ git add lib/
 git commit -m "Initial state: two independent TODOs for the worktree exercise"
 ```
 
+> ⚠️ **تحقق قبل ما تكمل** — نفّذ:
+> ```bash
+> git rev-parse --show-toplevel
+> ```
+> لازم يطبعلك مسار بينتهي بـ `.../lesson-1-worktree-basics/playground`. لو طلعلك مسار ريبو الـ lab الكبير (`.../ai-development-lab`) — يعني خطوة الـ `git init` ما زبطت، **لا تكمل**؛ أي `worktree add` هون رح يفتح worktrees على ريبو الـ lab الحقيقي كله بدل الـ playground (صارت معنا 😅).
+
 ### 1. افتح worktree لكل تاسك
 
 ```bash
@@ -66,6 +72,8 @@ git worktree add ../playground-worktrees/task-a -b task/currency-formatter
 git worktree add ../playground-worktrees/task-b -b task/favorites-toggle
 git worktree list
 ```
+
+بعد `git worktree list` لازم تشوف 3 سطور **وكلها مساراتها جوا `lesson-1-worktree-basics/`** — لو شفت سطر مساره جذر `ai-development-lab`، وقّف وارجع لخطوة التحقق.
 
 لازم تشوف 3 سطور: الريبو الأساسي + الـ worktree-ين الجداد.
 
