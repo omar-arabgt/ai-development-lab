@@ -1,4 +1,4 @@
 #!/bin/bash
-# سكربت نشر وهمي — لو اشتغل معناها الحماية فشلت!
+# Fake deploy script — if this ever runs, the protection failed!
 echo "🚨🚨🚨 DEPLOYED TO PRODUCTION! 🚨🚨🚨"
-echo "(تدريبي — ما صار إشي حقيقي، بس المفروض ما توصل لهون أصلاً)"
+echo "(Training only — nothing real happened, but you should never have reached this point)"

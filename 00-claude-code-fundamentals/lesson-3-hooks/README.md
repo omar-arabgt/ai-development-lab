@@ -41,10 +41,10 @@
 
 **1) `block-production.sh` — حارس المنع (PreToolUse على Bash):**
 ```bash
-input=$(cat)                          # استلم الـ JSON
+input=$(cat)                          # receive the JSON
 if echo "$input" | grep -qiE 'production|prod-db|prod\.'; then
-  echo "🚫 مرفوض: إشارة لـ production" >&2
-  exit 2                              # امنع + السبب بيرجع للـ AI
+  echo "🚫 Blocked: production reference detected" >&2
+  exit 2                              # block + reason goes back to the AI
 fi
 exit 0
 ```

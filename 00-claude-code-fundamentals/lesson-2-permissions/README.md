@@ -32,12 +32,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dart run:*)"          // شغّل dart run بدون ما تسألني
+      "Bash(dart run:*)"          // run dart without asking me
     ],
     "deny": [
-      "Read(./secrets/**)",        // ولا ملف من مجلد الأسرار بينقرأ
-      "Bash(cat:*)",               // سد الطريق الجانبي (قراءة عبر الطرفية)
-      "Bash(./deploy_production.sh:*)"  // سكربت النشر خط أحمر
+      "Read(./secrets/**)",        // no file under secrets/ can ever be read
+      "Bash(cat:*)",               // close the side door (reading via terminal)
+      "Bash(./deploy_production.sh:*)"  // deploy script is a red line
     ]
   }
 }

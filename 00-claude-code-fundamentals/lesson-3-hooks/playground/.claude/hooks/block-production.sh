@@ -1,14 +1,14 @@
 #!/bin/bash
-# 🛡️ حارس production — PreToolUse hook على أداة Bash
-# بيستلم JSON فيه تفاصيل الأمر عبر stdin، وبيقرر: يمرّق أو يمنع
+# 🛡️ Production guard — PreToolUse hook on the Bash tool
+# Receives JSON with command details via stdin, then decides: allow or block
 
 input=$(cat)
 
-# فحص المحتوى: أي إشارة لـ production بأي صياغة → منع
+# Content inspection: any reference to production, in any form → block
 if echo "$input" | grep -qiE 'production|prod-db|prod\.'; then
-  echo "🚫 مرفوض من حارس production: الأمر فيه إشارة لبيئة الإنتاج." >&2
-  echo "القانون: الـ AI ما بيلمس production نهائياً — بلا استثناءات." >&2
-  exit 2   # exit 2 = امنع العملية، والرسالة فوق بترجع للـ AI
+  echo "🚫 Blocked by production guard: this command references the production environment." >&2
+  echo "Rule: AI never touches production — no exceptions." >&2
+  exit 2   # exit 2 = block the operation; the message above goes back to the AI
 fi
 
-exit 0     # exit 0 = مرّق
+exit 0     # exit 0 = allow

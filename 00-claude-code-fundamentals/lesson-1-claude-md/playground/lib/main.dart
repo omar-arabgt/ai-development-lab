@@ -12,7 +12,9 @@ double gt_calculate_discount(double price, double discountPercentage) {
 
 // بتحسب سعر السيارة النهائي بعد إضافة الجمرك وطرح الخصم
 double gt_calculate_final_price(double price, double discountPercentage) {
-  return price + gt_calculate_tax(price) - gt_calculate_discount(price, discountPercentage);
+  return price +
+      gt_calculate_tax(price) -
+      gt_calculate_discount(price, discountPercentage);
 }
 
 // بتحول السعر من دولار أمريكي لدينار عراقي

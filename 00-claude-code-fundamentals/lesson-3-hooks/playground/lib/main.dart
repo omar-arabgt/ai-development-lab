@@ -1,4 +1,5 @@
-// مشروع تجريبي للدرس 3 — Hooks
+// Demo project for Lesson 3 — Hooks
 void main() {
-  print('مرحبا من playground الدرس 3 🛡️');
+  var x = 42;
+  print('Hello from Lesson 3 playground 🛡️');
 }
