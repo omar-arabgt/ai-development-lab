@@ -20,6 +20,10 @@ class ReservationDeposit {
 
   /// Splits the deposit across [installments] payments.
   static double perInstallment(double carPrice, int installments) {
+    if (installments <= 0) {
+      throw ArgumentError.value(installments, 'installments', 'must be positive');
+    }
     return compute(carPrice) / installments;
+  }
   }
 }
