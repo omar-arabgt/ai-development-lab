@@ -3,7 +3,7 @@
 /// NOTE: unlike previous playgrounds, this one ships IMPLEMENTED and green —
 /// the exercise is breaking it in a PR and watching the cloud referee catch it.
 class ReservationDeposit {
-  // 5% is the contracted rate — see specs/reservation-deposit.md (AC1).
+  // 5% is the contracted rate — see specs/reservation-deposit.md (AC1). This is the rate at which the deposit is calculated.
   static const double _rate = 0.05;
   static const double _minimum = 500;
   static const double _maximum = 2000;
