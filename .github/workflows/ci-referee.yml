@@ -1,0 +1,22 @@
+# Module 03, Lesson 1: the cloud referee.
+# Runs the spec checker on every PR that touches the lesson playground.
+name: CI Referee
+
+on:
+  pull_request:
+    paths:
+      - '03-pr-review-automation/lesson-1-ci-referee/playground/**'
+
+jobs:
+  spec-check:
+    name: Spec contract check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the PR code
+        uses: actions/checkout@v4
+
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Run the referee (exit code is the gate)
+        run: dart 03-pr-review-automation/lesson-1-ci-referee/playground/tool/spec_check.dart
