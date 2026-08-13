@@ -1,8 +1,21 @@
 /// Loyalty points earned on a completed purchase.
 class PointsCalculator {
-  /// TASK: see specs/loyalty-points.md — but read it as a contract
-  /// auditor first, not as an implementer.
+  /// See specs/loyalty-points.md — the spec is the only source of truth.
   static int earn(double purchaseAmount, DateTime purchaseDate) {
-    throw UnimplementedError('TODO: implement PointsCalculator.earn');
+    if (purchaseAmount.isNaN || purchaseAmount < 0) {
+      return 0;
+    }
+
+    // AC3: round to 3 decimals first to absorb double representation drift.
+    final roundedAmount = ((purchaseAmount * 1000) + 0.5).floor() / 1000;
+
+    final isWeekend = purchaseDate.weekday == DateTime.friday ||
+        purchaseDate.weekday == DateTime.saturday;
+
+    final points = isWeekend
+        ? (roundedAmount / 100).floor() * 2
+        : ((roundedAmount / 100) + 0.5).floor(); // round-half-up
+
+    return points > 100 ? 100 : points;
   }
 }

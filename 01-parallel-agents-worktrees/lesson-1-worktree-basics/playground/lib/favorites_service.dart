@@ -8,6 +8,11 @@ class FavoritesService {
   /// remove it if present. Return true if the car ended up favorited,
   /// false otherwise.
   bool toggleFavorite(String carId) {
-    throw UnimplementedError('TODO: implement FavoritesService.toggleFavorite');
+    if (_favoriteCarIds.contains(carId)) {
+      _favoriteCarIds.remove(carId);
+      return false;
+    }
+    _favoriteCarIds.add(carId);
+    return true;
   }
 }

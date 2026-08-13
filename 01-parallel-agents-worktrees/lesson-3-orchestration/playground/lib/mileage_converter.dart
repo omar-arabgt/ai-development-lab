@@ -5,6 +5,9 @@ class MileageConverter {
   /// TASK: convert [miles] to kilometers, rounded to the nearest integer.
   /// Throw an ArgumentError if [miles] is negative.
   static int milesToKm(double miles) {
-    throw UnimplementedError('TODO: implement MileageConverter.milesToKm');
+    if (miles < 0) {
+      throw ArgumentError('miles must not be negative');
+    }
+    return (miles * _kmPerMile).round();
   }
 }
