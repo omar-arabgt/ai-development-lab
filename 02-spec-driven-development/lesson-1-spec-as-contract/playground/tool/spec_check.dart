@@ -49,6 +49,8 @@ void main() {
       () => throwsArgumentError(() => PriceDropBadge.compute(0, 5000)));
   check('AC5b', 'negative newPrice -> ArgumentError',
       () => throwsArgumentError(() => PriceDropBadge.compute(10000, -1)));
+  check('AC5c', 'newPrice = 0 (free car) -> ArgumentError, not a 100% deal',
+      () => throwsArgumentError(() => PriceDropBadge.compute(10000, 0)));
 
   print('');
   print('$passed passed, $failed failed');

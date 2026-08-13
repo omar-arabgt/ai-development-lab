@@ -35,7 +35,9 @@ claude
 
 اطلب بالحرف، **ولا تزيد ولا كلمة**:
 
-> Implement PriceDropBadge.compute in lib/price_drop_badge.dart — it should give a badge when the price drops. Don't read anything in specs/.
+> Implement PriceDropBadge.compute in lib/price_drop_badge.dart — it should give a badge when the price drops. Don't read anything in specs/ or tool/.
+
+> 💡 **ليش منحجب `tool/` كمان؟** لأنه الفاحص نفسه بيحتوي كل الأجوبة (النسب، النصوص، حالات الخطأ) — والـ AI بيستكشف المشروع وبيلاقيها. صارت معنا بأول تجربة: المشهد الضبابي طلع 8/8 لأنه قرأ الفاحص واشتغل عليه — وطلع كود "بينجح بالفحص وبيخالف العقد" (سيارة ببلاش = HOT DEAL بدل خطأ، لأنه الفاحص وقتها ما كان بيجرب الصفر). العبرة المزدوجة: الفحوصات نفسها spec قابلة للتنفيذ، والحكم قوي على قد تغطيته.
 
 لما يخلص، **احكم عليه بالحكم المحايد**:
 
