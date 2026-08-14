@@ -1,6 +1,6 @@
 // Simulates the nightly job that imports car listings from a dealer feed.
-// One listing carries a malformed price — the crash is the point: it must
-// land in Sentry so the AI can find it there in the next lessons.
+// Dealer feeds sometimes send formatted prices (thousands separators,
+// currency suffixes) instead of plain numeric strings.
 import 'dart:io';
 
 import 'package:sentry/sentry.dart';
@@ -8,9 +8,18 @@ import 'package:sentry/sentry.dart';
 const dealerFeed = [
   {'model': 'Toyota Corolla 2022', 'price': '15500'},
   {'model': 'Kia Sportage 2023', 'price': '21000'},
-  // Planted bug: the feed sometimes sends formatted prices.
   {'model': 'Hyundai Tucson 2024', 'price': '12,500 JOD'},
 ];
+
+/// Extracts a numeric price from a dealer feed value, tolerating thousands
+/// separators and currency suffixes/prefixes (e.g. "12,500 JOD"). Returns
+/// null when no number can be recovered.
+double? parsePrice(String raw) {
+  final cleaned = raw.replaceAll(',', '');
+  final match = RegExp(r'-?\d+(\.\d+)?').firstMatch(cleaned);
+  if (match == null) return null;
+  return double.tryParse(match.group(0)!);
+}
 
 Future<void> main() async {
   final dsn = Platform.environment['SENTRY_DSN'];
@@ -26,12 +35,16 @@ Future<void> main() async {
 
   try {
     for (final listing in dealerFeed) {
-      final price = double.parse(listing['price']!); // boom on the third one
+      final rawPrice = listing['price']!;
+      final price = parsePrice(rawPrice);
+      if (price == null) {
+        final error = FormatException('Unparseable price: "$rawPrice"');
+        await Sentry.captureException(error, stackTrace: StackTrace.current);
+        stderr.writeln('Skipping ${listing['model']}: invalid price "$rawPrice"');
+        continue;
+      }
       print('Imported ${listing['model']} at $price JOD');
     }
-  } catch (exception, stackTrace) {
-    await Sentry.captureException(exception, stackTrace: stackTrace);
-    stderr.writeln('Import crashed — the error was reported to Sentry.');
   } finally {
     await Sentry.close();
   }
