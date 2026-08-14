@@ -2,10 +2,11 @@
 # Runs the spec checker on every PR that touches the lesson playground.
 name: CI Referee
 
+# No paths filter: this check is REQUIRED by branch protection, and a
+# required check that never reports (because the filter skipped it)
+# leaves unrelated PRs stuck on "Expected". It costs ~11s per PR.
 on:
   pull_request:
-    paths:
-      - '03-pr-review-automation/lesson-1-ci-referee/playground/**'
 
 jobs:
   spec-check:
