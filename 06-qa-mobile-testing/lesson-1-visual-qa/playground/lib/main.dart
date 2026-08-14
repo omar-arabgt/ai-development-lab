@@ -41,29 +41,67 @@ class ListingsPage extends StatelessWidget {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final car = cars[index];
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Icon(Icons.directions_car, size: 40),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    car.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => CarDetailsPage(car: car)),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Icon(Icons.directions_car, size: 40),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      car.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  '${car.price} JOD',
-                  style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Text(
+                    '${car.price} JOD',
+                    style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+                  ),
+                ],
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class CarDetailsPage extends StatelessWidget {
+  const CarDetailsPage({super.key, required this.car});
+  final Car car;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('تفاصيل السيارة')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.directions_car, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              car.name,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${car.price} JOD',
+              style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: Directionality(
         textDirection: TextDirection.rtl,
