@@ -19,7 +19,7 @@
 | 02 | [Spec-Driven Development](02-spec-driven-development/) | من spec مكتوب → كود كامل مع tests | ✅ |
 | 03 | [PR Review أوتوماتيك](03-pr-review-automation/) | كل PR بينفتح → review تلقائي (GitHub Actions) | ✅ |
 | 04 | [Sentry Auto-Fix](04-sentry-autofix/) | Bug يوصل من Sentry → agent يحلل ويصلّح ويفتح PR | ✅ |
-| 05 | [Linear Triage](05-linear-triage/) | تصنيف وترتيب التذاكر الجديدة تلقائياً | 🔨 |
+| 05 | [Linear Triage](05-linear-triage/) | تصنيف وترتيب التذاكر الجديدة تلقائياً | ✅ |
 | 06 | [QA Testing للتطبيق](06-qa-mobile-testing/) | اختبار الـ user journeys على التطبيق (موبايل) أوتوماتيك | ⏳ |
 | 07 | [Analytics (PostHog)](07-analytics-posthog/) | شو هو PostHog وليش انذكر بالميتنغ + ديمو insights | ⏳ |
 | 08 | [حماية الـ DB والبيئات](08-safety-db-guardrails/) | الـ AI ما بيلمس production أبداً — عزل، باك أب، صلاحيات | ⏳ |
