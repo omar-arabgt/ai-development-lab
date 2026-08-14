@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); if echo \"$INPUT\" | grep -qiE 'prod-db|production-db|\\-\\-env[= ]production|db\\.arabgt'; then echo \"BLOCKED by the production red line: this command references a production database or environment. The lab (and the AI Factory) never touches production data — use dev/qa/staging targets only.\" >&2; exit 2; fi; exit 0",
+            "statusMessage": "Red line: checking command does not touch production data"
+          }
+        ]
+      }
+    ]
+  }
+}
