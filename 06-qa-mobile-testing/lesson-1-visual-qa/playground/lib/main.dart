@@ -47,32 +47,35 @@ class ListingsPage extends StatelessWidget {
               children: [
                 const Icon(Icons.directions_car, size: 40),
                 const SizedBox(width: 12),
-                // BUG 1 (planted): long names overflow the row — no
-                // Expanded/ellipsis, so the dealer-feed Mercedes explodes.
-                Text(
-                  car.name,
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                Expanded(
+                  child: Text(
+                    car.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                  ),
                 ),
-                const Spacer(),
-                // BUG 2 (planted): light grey price on a white card —
-                // nearly unreadable.
+                const SizedBox(width: 12),
                 Text(
                   '${car.price} JOD',
-                  style: TextStyle(fontSize: 15, color: Colors.grey.shade300),
+                  style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
                 ),
               ],
             ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم إرسال طلب الحجز')),
-          );
-        },
-        label: const Text('احجز الآن'),
-        icon: const Icon(Icons.event_available),
+      floatingActionButton: Directionality(
+        textDirection: TextDirection.rtl,
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('تم إرسال طلب الحجز')),
+            );
+          },
+          label: const Text('احجز الآن'),
+          icon: const Icon(Icons.event_available),
+        ),
       ),
     );
   }
