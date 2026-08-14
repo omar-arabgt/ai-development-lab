@@ -1,0 +1,5 @@
+name: webhook_playground
+description: Local webhook listener that wakes a headless Claude pipeline.
+publish_to: none
+environment:
+  sdk: ^3.0.0

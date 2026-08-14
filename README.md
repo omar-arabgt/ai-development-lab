@@ -22,8 +22,8 @@
 | 05 | [Linear Triage](05-linear-triage/) | تصنيف وترتيب التذاكر الجديدة تلقائياً | ✅ |
 | 06 | [QA Testing للتطبيق](06-qa-mobile-testing/) | اختبار الـ user journeys على التطبيق (موبايل) أوتوماتيك | ✅ |
 | 07 | [Analytics (PostHog)](07-analytics-posthog/) | شو هو PostHog وليش انذكر بالميتنغ + ديمو insights | ✅ |
-| 08 | [حماية الـ DB والبيئات](08-safety-db-guardrails/) | الـ AI ما بيلمس production أبداً — عزل، باك أب، صلاحيات | 🔨 |
-| 09 | [بنية الأتمتة](09-automation-infra/) | الطبقة اللي بتخلي كل شي فوق يشتغل لحاله: webhooks, cron, CI | ⏳ |
+| 08 | [حماية الـ DB والبيئات](08-safety-db-guardrails/) | الـ AI ما بيلمس production أبداً — عزل، باك أب، صلاحيات | ✅ |
+| 09 | [بنية الأتمتة](09-automation-infra/) | الطبقة اللي بتخلي كل شي فوق يشتغل لحاله: webhooks, cron, CI | 🔨 |
 
 📖 [قاموس المصطلحات](GLOSSARY.md) — كل مصطلح هندسي منمر عليه، عربي وإنجليزي
 
