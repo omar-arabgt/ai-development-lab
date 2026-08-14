@@ -8,7 +8,7 @@ import 'package:sentry/sentry.dart';
 const partnerFeed = [
   {'name': 'Amman Motors', 'branches': '3'},
   {'name': 'Irbid Auto City', 'branches': '5'},
-  // Planted bug: the partner sometimes sends "N/A" instead of a number.
+  // The partner sometimes sends "N/A" instead of a number.
   {'name': 'Zarqa Cars', 'branches': 'N/A'},
 ];
 
@@ -26,12 +26,16 @@ Future<void> main() async {
 
   try {
     for (final dealer in partnerFeed) {
-      final branches = int.parse(dealer['branches']!); // boom on "N/A"
+      final rawBranches = dealer['branches']!;
+      final branches = int.tryParse(rawBranches);
+      if (branches == null) {
+        final error = FormatException('Unparseable branch count: "$rawBranches"');
+        await Sentry.captureException(error, stackTrace: StackTrace.current);
+        stderr.writeln('Skipping ${dealer['name']}: invalid branch count "$rawBranches"');
+        continue;
+      }
       print('Registered ${dealer['name']} with $branches branches');
     }
-  } catch (exception, stackTrace) {
-    await Sentry.captureException(exception, stackTrace: stackTrace);
-    stderr.writeln('Dealer import crashed — the error was reported to Sentry.');
   } finally {
     await Sentry.close();
   }
