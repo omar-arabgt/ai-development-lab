@@ -4,3 +4,11 @@
 # Dart tooling artifacts in lesson playgrounds
 **/.dart_tool/
 **/.DS_Store
+
+# Flutter platform/build artifacts generated locally in QA playgrounds
+06-qa-mobile-testing/**/ios/
+06-qa-mobile-testing/**/android/
+06-qa-mobile-testing/**/macos/
+06-qa-mobile-testing/**/build/
+06-qa-mobile-testing/**/.metadata
+06-qa-mobile-testing/**/.flutter-plugins*

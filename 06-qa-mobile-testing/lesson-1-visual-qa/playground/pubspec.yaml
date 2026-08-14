@@ -1,0 +1,18 @@
+name: qa_playground
+description: Mini car-listing app with planted visual bugs for the visual QA lesson.
+publish_to: none
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
