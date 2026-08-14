@@ -1,0 +1,5 @@
+name: posthog_playground
+description: Seeds a week of fake car-market analytics events into PostHog.
+publish_to: none
+environment:
+  sdk: ^3.0.0
