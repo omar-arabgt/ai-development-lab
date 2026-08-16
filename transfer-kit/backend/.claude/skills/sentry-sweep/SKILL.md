@@ -10,7 +10,7 @@ dedicated **"Sentry Bugs"** project — nowhere else.
 
 ## Procedure
 
-1. Fetch the top **N** unresolved issues from the company Sentry org,
+1. Fetch the top **N** unresolved issues from the `arabgt` org, project **`backend-prod`** (default; the user may name another env project like backend-qa),
    ordered by users affected (default N = 6; the user may override).
 2. **Dedupe first**: list existing cards in the "Sentry Bugs" Linear
    project. If a card already references an issue's Sentry ID/link,
