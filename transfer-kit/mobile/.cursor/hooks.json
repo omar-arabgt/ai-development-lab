@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "./.cursor/hooks/production-guard.sh",
+        "timeout": 10,
+        "failClosed": true
+      }
+    ]
+  }
+}
