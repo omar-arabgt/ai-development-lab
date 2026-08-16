@@ -23,11 +23,35 @@
     ],
     "deny": [
       "Read(.env*)",
-      "Read(**/secrets*)",
-      "Read(**/*.keystore)",
       "Read(**/key.properties)",
+      "Read(**/*.keystore)",
+      "Read(**/secrets*)",
       "Bash(flutter build appbundle*)",
       "Bash(flutter build ipa*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | python3 -c \"import json,sys; print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null || echo \"$INPUT\"); if echo \"$CMD\" | grep -qiE 'main_prod|environments/prod|fastlane .*(release|deploy|beta)|xcrun altool|upload.*(appstore|play)'; then echo 'BLOCKED by production red line: production entrypoints, builds, and store uploads are human-only. Releases go through the dev -> qa -> staging -> production promotion chain.' >&2; exit 2; fi; exit 0",
+            "statusMessage": "Red line: checking command is not a production build/deploy"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FP=$(echo \"$INPUT\" | python3 -c \"import json,sys; print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if echo \"$FP\" | grep -qiE 'environments/prod/|key\\.properties|\\.keystore|/\\.env|GoogleService-Info|google-services\\.json'; then echo 'BLOCKED by production red line: production environment files, signing configs, and Firebase configs are never edited by AI.' >&2; exit 2; fi; exit 0",
+            "statusMessage": "Red line: checking edit is not touching prod env or signing files"
+          }
+        ]
+      }
     ]
   }
 }

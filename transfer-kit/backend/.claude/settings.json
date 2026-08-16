@@ -26,11 +26,35 @@
     ],
     "deny": [
       "Read(.env*)",
+      "Read(env_varaibles/**)",
       "Read(**/secrets*)",
-      "Read(**/settings/production*)",
       "Bash(python manage.py shell*)",
       "Bash(python manage.py dbshell*)",
       "Bash(python manage.py flush*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | python3 -c \"import json,sys; print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null || echo \"$INPUT\"); if echo \"$CMD\" | grep -qiE 'DATABASE_URL=|--settings[= ][^ ]*(prod|staging)|(psql|pg_dump|pg_restore|mysql|mysqldump) .*(prod|staging|arabgt\\.com)|manage\\.py .*(--settings[= ][^ ]*(prod|staging))'; then echo 'BLOCKED by production red line: this command points at a production/staging database or settings. AI work targets the local docker-compose stack only.' >&2; exit 2; fi; exit 0",
+            "statusMessage": "Red line: checking command does not touch production/staging data"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FP=$(echo \"$INPUT\" | python3 -c \"import json,sys; print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if echo \"$FP\" | grep -qiE '/\\.env|env_varaibles/|/migrations/[0-9]{4}_'; then echo 'BLOCKED by production red line: env/secret files and committed migrations are never edited by AI. Create a NEW migration via makemigrations (needs approval) instead.' >&2; exit 2; fi; exit 0",
+            "statusMessage": "Red line: checking edit is not touching secrets or committed migrations"
+          }
+        ]
+      }
     ]
   }
 }
