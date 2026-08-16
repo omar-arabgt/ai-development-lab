@@ -10,11 +10,11 @@
 |---|---|---|---|
 | ذاكرة المشروع / القوانين | `CLAUDE.md` | Rules (`.cursor/rules`) | ✅ درس 1 + ablation test |
 | صلاحيات وحدود | Permissions (allow/ask/deny) | Agent auto-run settings | ✅ درس 2 |
-| حراس بكود (منع/فحص أوتوماتيك) | Hooks (PreToolUse, PostToolUse...) | — لا يوجد مقابل كامل | ✅ درس 3 (production guard + quality gate) |
+| حراس بكود (منع/فحص أوتوماتيك) | Hooks (PreToolUse...) — GA وناضجة | Hooks (منذ أواخر 2025، `.cursor/hooks.json`) — أحدث عهداً | ✅ درس 3 (production guard + quality gate) |
 | موظفين متخصصين بصلاحيات معزولة | Subagents (`.claude/agents/`) | — لا يوجد مقابل مباشر | ✅ درس 4 |
-| شغل متوازي | Parallel agents + git worktrees | Background Agents | 🔜 موديول 01 |
+| شغل متوازي | Parallel agents + git worktrees | أصلي منذ 2.0: worktrees، لحد 8 agents، /multitask، subagents | ✅ موديول 01 |
 | ربط أدوات خارجية (Linear, Sentry...) | MCP | MCP (نفس البروتوكول!) | 🔜 |
-| تشغيل بدون واجهة (للأتمتة/CI) | Headless: `claude -p` + GitHub Action رسمية | — محدود | 🔜 موديولات 03/04/09 |
+| تشغيل بدون واجهة (للأتمتة/CI) | Headless: `claude -p` + GitHub Action رسمية + كفاءة توكنز أعلى (~5.5x بمقارنات مستقلة) | cursor-agent CLI بوضع `-p` + action مجتمعية | ✅ موديولات 03/04/09 |
 | الإكمال الذكي أثناء الكتابة | — (مش تخصصه) | Tab completion (نقطة قوة Cursor) | — |
 
 ## الخلاصة الاستراتيجية للجلسة

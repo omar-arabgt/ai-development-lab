@@ -87,15 +87,19 @@ On top of knowledge come boundaries: **Permissions** — explicit lists of what 
 
 ## The summary — who owns what (memorize this)
 
-| Area | Chosen tool | Why |
+> ⚠️ **Fact-check update (2026-08-16):** Cursor has closed many gaps — it now has hooks (late 2025, `.cursor/hooks.json`), a headless CLI (`agent -p`), native parallel agents in worktrees (up to 8), and SKILL.md skills. **The decision stands — but for sharper, updated reasons:**
+
+| Area | Chosen tool | Why (updated) |
 |---|---|---|
 | Daily writing in the editor | **Cursor** | Tab completion and inline edits — its native strength |
 | Project memory | **Both** | Two files, one set of rules: CLAUDE.md + .cursor/rules |
-| Parallel work (worktrees) | **Both** — full orchestration on Claude | Shared git mechanics; the orchestrator and baked-in policies are Claude's |
-| Hard guards (hooks) | **Claude only** | Cursor has no equivalent — and this is the safety precondition |
-| PR review | **Claude** (an action we own and configure) | Bugbot is a paid, less-controllable alternative |
-| All automation (CI, scheduling, server, webhooks) | **Claude only** | Headless mode (`claude -p`) does not exist in Cursor |
+| Parallel work (worktrees) | **Both** | Native in both now — shared git mechanics |
+| Guards (hooks) | **Claude for automation** | Both have them now — Claude's are older and battle-tested (GA, proven in our setup); Cursor's are months old |
+| PR review | **Claude** (official action, prompt fully ours) | Cursor alternatives: hosted Bugbot or a community action — less control |
+| Automation (CI, server, webhooks) | **Claude** | No longer exclusive — but: **~5.5x fewer tokens for identical tasks** in independent comparisons, transparent per-pipeline API billing (batch −50% + caching) vs credit-based plans, first-party GitHub integration, and our entire playbook is already built and proven on it |
 | Service connections (MCP) | **Shared** | Same protocol — one investment serves both |
+
+**The updated bottom line:** it is no longer "who can" — both can. The decision is economics, maturity, and readiness: automation on Claude, the editor on Cursor.
 
 ---
 
@@ -135,3 +139,23 @@ Every piece is defined in the earlier sections — this one just composes them. 
 - **Configured once per machine/account**: MCP connections, OAuth authentications, company-workspace guards
 - **Configured once in the cloud**: GitHub Secrets, Branch Protection, Firebase, the AWS server
 - **Free by default, zero work**: git worktrees, recovery, parallelism itself — the features exist; we just use them correctly
+
+---
+
+# 8. The Full Loop: Sentry Error → Linear Ticket → GitHub PR
+
+## What you say
+
+"And here is the moment everything composes: a crash happens at 3 AM. Sentry collects it, and an alert rule fires a webhook to our server. The listener launches one pipeline that, in order: pulls the issue details, **creates a Linear ticket** — description, Sentry link, priority per our triage ladder — investigates the code and lands on the guilty line, fixes it on a branch, runs the checks, pushes and opens a **fully described PR**, comments the PR link on the ticket and moves it to In Review. The PR gates run on their own. In the morning, the engineer finds a documented ticket and an AI-reviewed PR — reads the diff and clicks Merge. And on merge, a GitHub webhook closes the loop: the ticket goes to Done and the Sentry issue to Resolved. **From crash to PR: zero hands. The only hand: the merge click.**"
+
+## Where it's defined
+
+| Step | Exactly where | Who writes it |
+|---|---|---|
+| Sentry → webhook | Sentry UI: Alerts → New Alert Rule → action: webhook to our server URL | One-time setup |
+| The listener | A script on the AWS server (~70 lines — template ready in the lab) | Code we write |
+| The pipeline | `scripts/sentry_to_pr.sh` in the repo: one `claude -p` command + `--allowedTools "mcp__sentry__*,mcp__linear__*,Read,Grep,Edit,Bash(git *),Bash(gh pr create:*)"` | Code we write — every segment already proven (modules 04 + 05) |
+| Opening the PR from the server | `gh` CLI authenticated as a bot / GitHub App | One-time setup |
+| Closing on merge | GitHub → Settings → Webhooks → event: pull_request → a small closing pipeline: ticket → Done, issue → Resolved | Code we write (a few lines) |
+
+**Honesty note for the presentation:** every segment of this chain has been run for real — Sentry→PR in one command, and Linear→spec→implementation→ticket-updates-itself — the final wiring through webhooks is Phase E of the transfer plan (needs the server).
