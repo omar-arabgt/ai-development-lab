@@ -94,7 +94,8 @@ These features deviate from the standard anatomy for historical/practical reason
 ## Linear (company workspace: ArabGT)
 
 - Every ticket for this repo goes to team **ArabGT**, project **"ArabGT Mobile App"** —
-  the ONLY Linear project for the mobile app. Never create or target another project.
+  the company's SINGLE shared Linear project (mobile + backend use the same one).
+  Never create or target another project.
 - Sentry-derived cards carry the `Sentry` label so they stay filterable among regular tickets.
 - When AI finishes a fix (PR opened), move the ticket to the status named exactly
   **"In Review from AI"** — a human reviews after AI. If that status is ever missing,

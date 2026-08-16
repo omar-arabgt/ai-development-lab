@@ -1,0 +1,91 @@
+---
+description: Project memory — mirrored from CLAUDE.md (single source of truth)
+alwaysApply: true
+---
+
+# ArabGT Backend — Project Memory
+
+Django backend for the ArabGT platform (content/news, community, mobile API).
+
+## Stack
+
+- **Django 4.2 + Django REST Framework**; JWT auth (`simplejwt`) + `dj-rest-auth` with social login
+- **PostgreSQL** (psycopg3) — pgbouncer config scripts at repo root
+- **Redis + Celery** (+ celery-beat schedules, celery-results) — config in `core/celery.py`
+- **modeltranslation** — content is bilingual (Arabic/English); model fields carry translated variants
+- Media/storage: S3 via `django-storages` + `boto3`; rich text via CKEditor 5
+- Push/SMS: OneSignal, Twilio; **Sentry SDK already integrated** (`sentry-sdk[django]`)
+- Served with gunicorn + whitenoise; Docker + `docker-compose.yml` for local
+- Timezone: `Asia/Amman`
+
+## Layout
+
+- `core/` — project package: `settings.py`, `celery.py`, shared `filters.py`, `utils` (custom DRF exception handler)
+- Django apps: `adminpanel`, `analytics`, `api`, `authentication`, `base`, `cms`, `common`, `news`, `web` (+ `dashboard` work in progress)
+- `env/` — local Python virtualenv (never touch); `env_varaibles/` and `.env*` files — secrets (**never read or print their contents**)
+- `locale/` — translations; `docs/` — internal docs
+
+## API conventions
+
+- DRF with a **custom exception handler** (`core.utils.custom_exception_handler`) — keep error responses consistent with it
+- Auth: real authentication first, with a **guest-user fallback** so unauthenticated requests still get a GuestUser identity — do not break this contract when touching auth
+- New endpoints follow the existing app structure: serializer + view + url in the owning app; filters via `django-filter` / `core/filters.py`
+
+## Bilingual content — IMPORTANT
+
+Any new content model/field that users see must be registered for translation (modeltranslation) with Arabic and English variants. Check an existing model in `news/` for the pattern before adding fields.
+
+## Red lines
+
+- **Never run** `manage.py shell`, `dbshell`, `flush`, or any command against a non-local database. Local work targets the docker-compose database only
+- **Never read** `.env*` files, `env_varaibles/`, or any credentials; never commit `dump.rdb`, generated dumps, or data files
+- Migrations: `makemigrations` needs explicit approval; never edit an already-committed migration
+- Celery tasks: changes to schedules (`celery-beat`) need explicit approval
+- All work on branches; PRs only
+
+## Commands
+
+- Tests: `python manage.py test` (app-scoped: `python manage.py test news`)
+- Checks: `python manage.py check`
+- Local stack: `docker-compose up` (DB/Redis/worker — see `docker-compose.yml`)
+
+## The MySQL news source — READ ONLY by design
+
+The `news` app reads from a second database, `mysql_db` (external news source), routed by `core/routers.py` (`ReadOnlyRouter`):
+- Reads for `news` models go to `mysql_db`; **writes are blocked** (router returns None) and migrations never run there
+- Treat `news` models as **read-only mirrors of an external schema**: never add fields expecting local storage, never write to them, never run anything targeting `mysql_db`
+- This is why `mysqlclient` is in requirements — it is live and required, not legacy
+
+## Where new endpoints go (confirmed by Omar)
+
+- Request is for the **mobile app** → the `api` app
+- Request is for the **website** → the `web` app
+- **Not sure which? STOP and ask Omar (or the requester) before writing** — never guess this boundary
+
+## Code style (house convention — inferred and approved)
+
+- No enforced formatter/linter yet — **match the style of the file you are editing** (quote style and layout vary per app; consistency within the file beats global rules)
+- PEP8 baseline; serializers live in `serializers.py` per app (existing pattern)
+- Candidate improvement for later: adopting ruff — decision pending
+
+## Sentry (company org: `arabgt`)
+
+- This service's projects, one per environment: `backend-dev`, `backend-qa`, `backend-staging`, `backend-prod`
+- The mobile app has its own parallel set (`mobile-*`) — never mix them up when triaging
+- **Read-only phase**: reading and analyzing issues is allowed; resolving/assigning/modifying anything in the company org is blocked by guard until the team approves writes
+
+## Branch flow (confirmed by Omar)
+
+- Daily work happens on **`dev`** — feature branches fork from `dev` and PRs target `dev`
+- Promotion chain for releases: **`dev` → `qa` (testing) → `staging` → `production`**
+- Never commit or PR directly to `qa`/`staging`/`production` — they receive promotions only
+
+## Linear (company workspace: ArabGT)
+
+- Every ticket for this repo goes to team **ArabGT**, project **"ArabGT Mobile App"** —
+  the company's SINGLE shared Linear project (mobile + backend use the same one).
+  Never create or target another project.
+- Sentry-derived cards carry the `Sentry` label so they stay filterable among regular tickets.
+- When AI finishes a fix (PR opened), move the ticket to the status named exactly
+  **"In Review from AI"** — a human reviews after AI. If that status is ever missing,
+  stop and ask; never substitute another status.
