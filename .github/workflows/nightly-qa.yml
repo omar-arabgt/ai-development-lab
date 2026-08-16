@@ -1,0 +1,54 @@
+# Module 06, Lesson 3: QA on the server — the journey tests run
+# nightly on a cloud macOS machine with a real iOS simulator,
+# and can be fired on demand from the Actions tab (workflow_dispatch).
+name: Nightly QA
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 02:00 UTC = 05:00 Amman, every night
+  workflow_dispatch:        # the "Run workflow" button for demos
+
+jobs:
+  journey-tests:
+    name: User journeys on iOS simulator
+    runs-on: macos-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: 06-qa-mobile-testing/lesson-1-visual-qa/playground
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Generate the iOS platform folder
+        run: flutter create . --platforms=ios
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Boot an iPhone simulator
+        run: |
+          UDID=$(xcrun simctl list devices available | grep -E 'iPhone' | head -1 | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
+          echo "Booting $UDID"
+          xcrun simctl boot "$UDID"
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+
+      - name: Run the booking journey
+        run: flutter test integration_test -d "$UDID"
+
+      - name: Capture evidence screenshot
+        if: always()
+        run: xcrun simctl io "$UDID" screenshot qa-final-state.png || true
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-evidence
+          path: 06-qa-mobile-testing/lesson-1-visual-qa/playground/qa-final-state.png
+          if-no-files-found: ignore
