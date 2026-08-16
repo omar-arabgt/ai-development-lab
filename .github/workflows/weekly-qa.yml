@@ -1,0 +1,149 @@
+# Module 06, Lesson 4: the weekly deep sweep — full test suite on the
+# server + the booking journey on REAL physical devices via Firebase
+# Test Lab. The Test Lab job self-skips politely until the Firebase
+# secrets are configured (see the lesson README).
+name: Weekly QA
+
+on:
+  schedule:
+    - cron: '0 3 * * 5'   # Friday 03:00 UTC = 06:00 Amman, weekly
+  workflow_dispatch:
+    inputs:
+      devices:
+        description: 'Test Lab devices (repeatable gcloud --device args)'
+        required: false
+        default: 'model=shiba,version=34;model=a15,version=34'
+
+jobs:
+  full-suite:
+    name: Full deterministic suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flutter (includes Dart)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Run every spec checker in the repo
+        run: |
+          {
+            echo "## 🧪 Weekly full suite — spec contract checkers"
+            echo ""
+            echo "| Result | Checker |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          FAILED=0
+          for checker in $(git ls-files '*tool/spec_check.dart'); do
+            dir=$(dirname "$(dirname "$checker")")
+            name=$(echo "$dir" | cut -d/ -f1-2)
+            if (cd "$dir" && dart pub get >/dev/null 2>&1 || true; cd "$dir" && dart "tool/spec_check.dart" >/dev/null 2>&1); then
+              echo "| ✅ | $name |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| ❌ | $name |" >> "$GITHUB_STEP_SUMMARY"
+              FAILED=1
+            fi
+          done
+          exit $FAILED
+
+      - name: Analyze the QA app
+        working-directory: 06-qa-mobile-testing/lesson-1-visual-qa/playground
+        run: |
+          flutter pub get
+          flutter analyze
+          echo "| ✅ | flutter analyze (qa playground) |" >> "$GITHUB_STEP_SUMMARY"
+
+  real-devices:
+    name: Journeys on real devices (Firebase Test Lab)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: 06-qa-mobile-testing/lesson-1-visual-qa/playground
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Firebase credentials
+        id: creds
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SA" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::FIREBASE_SERVICE_ACCOUNT secret not set — real-device run skipped (see lesson-4 README to enable)"
+            echo "## 📵 Real-device run skipped — Firebase secrets not configured yet" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Flutter
+        if: steps.creds.outputs.enabled == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Set up Java
+        if: steps.creds.outputs.enabled == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Generate Android platform + Test Lab shim
+        if: steps.creds.outputs.enabled == 'true'
+        run: |
+          flutter create . --platforms=android
+          flutter pub get
+          ./tool/prepare_testlab.sh
+
+      - name: Build app + instrumentation APKs
+        if: steps.creds.outputs.enabled == 'true'
+        run: |
+          pushd android
+          ./gradlew app:assembleDebug -Ptarget=integration_test/booking_journey_test.dart
+          ./gradlew app:assembleAndroidTest
+          popd
+
+      - name: Authenticate to Google Cloud
+        if: steps.creds.outputs.enabled == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        if: steps.creds.outputs.enabled == 'true'
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Run on real devices
+        if: steps.creds.outputs.enabled == 'true'
+        run: |
+          DEVICES="${{ github.event.inputs.devices || 'model=shiba,version=34;model=a15,version=34' }}"
+          DEVICE_ARGS=""
+          IFS=';' read -ra LIST <<< "$DEVICES"
+          for d in "${LIST[@]}"; do DEVICE_ARGS="$DEVICE_ARGS --device $d"; done
+          gcloud firebase test android run \
+            --type instrumentation \
+            --app build/app/outputs/flutter-apk/app-debug.apk \
+            --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            $DEVICE_ARGS \
+            --timeout 10m 2>&1 | tee testlab-output.txt
+          {
+            echo "## 📱 Real-device report (Firebase Test Lab)"
+            echo ""
+            echo '```'
+            grep -E 'Passed|Failed|Skipped|model|Test results' testlab-output.txt | head -20
+            echo '```'
+            grep -oE 'https://console\.firebase\.google\.com[^ ]*' testlab-output.txt | head -1 | sed 's/^/Full results: /'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Test Lab output
+        if: always() && steps.creds.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: testlab-output
+          path: 06-qa-mobile-testing/lesson-1-visual-qa/playground/testlab-output.txt
+          if-no-files-found: ignore
