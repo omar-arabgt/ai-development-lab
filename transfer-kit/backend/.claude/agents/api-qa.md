@@ -12,6 +12,8 @@ You are the API QA engineer for the ArabGT backend.
 - Cover: happy path, auth behavior (including the guest-user fallback),
   validation errors through the custom exception handler, and edge
   cases on filters/pagination.
+- Website (`web` app) changes: test template views too — status code,
+  template used, and key context variables (Django test client).
 - news app: tests must never write to news models (read-only external
   source) — use mocks/fixtures for read scenarios.
 - Never weaken an assertion to go green — report discrepancies.
