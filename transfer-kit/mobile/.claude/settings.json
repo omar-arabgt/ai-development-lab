@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze*)",
+      "Bash(flutter test*)",
+      "Bash(flutter pub get*)",
+      "Bash(dart analyze*)",
+      "Bash(dart format*)",
+      "Bash(dart run*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)",
+      "Bash(git worktree*)",
+      "Bash(git merge*)"
+    ],
+    "ask": [
+      "Bash(git push*)",
+      "Bash(gh pr create*)"
+    ],
+    "deny": [
+      "Read(.env*)",
+      "Read(**/secrets*)",
+      "Read(**/*.keystore)",
+      "Read(**/key.properties)",
+      "Bash(flutter build appbundle*)",
+      "Bash(flutter build ipa*)"
+    ]
+  }
+}

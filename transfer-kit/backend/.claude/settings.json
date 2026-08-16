@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pytest*)",
+      "Bash(python -m pytest*)",
+      "Bash(ruff*)",
+      "Bash(python manage.py test*)",
+      "Bash(python manage.py makemigrations --dry-run*)",
+      "Bash(python manage.py check*)",
+      "Bash(pip list*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)",
+      "Bash(git worktree*)",
+      "Bash(git merge*)"
+    ],
+    "ask": [
+      "Bash(git push*)",
+      "Bash(gh pr create*)",
+      "Bash(python manage.py makemigrations*)",
+      "Bash(python manage.py migrate*)"
+    ],
+    "deny": [
+      "Read(.env*)",
+      "Read(**/secrets*)",
+      "Read(**/settings/production*)",
+      "Bash(python manage.py shell*)",
+      "Bash(python manage.py dbshell*)",
+      "Bash(python manage.py flush*)"
+    ]
+  }
+}
