@@ -14,7 +14,7 @@ Turn a rough description (any language) into a formatted ticket AND create it in
 3. Fill the structure in `template.md` — exact section order.
 4. Ticket content in English, regardless of input language.
 5. Title format: `[Area] Short problem statement`.
-6. Ask ONCE per session which team the ticket belongs to, then reuse the choice.
+6. Destination is FIXED: team **ArabGT**, project **"ArabGT Mobile App"** — this repo's only Linear project. Do not ask, do not use any other project.
 7. Create the issue; reply with identifier, URL, and a reminder to attach the screenshot in Linear.
 
 ## Team policy (strict)
