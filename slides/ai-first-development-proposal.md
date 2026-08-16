@@ -67,6 +67,26 @@ Test authoring model: a QA engineer (or anyone) describes the journey in plain l
 
 Cost model: AI cost is paid **once at authoring**; layers 1–3 then run forever on free CI minutes. Layers 4–5 use AI per run and are therefore scheduled, not per-commit.
 
+### 5.1 Execution venues — three lines of defense, ordered by cost
+
+The same journey test file runs unchanged in three places; each venue catches what the previous one cannot see:
+
+| Venue | Devices | Trigger | Cost | Uniquely catches |
+|---|---|---|---|---|
+| Developer machine | one simulator | by hand | free | fast edit-test loop while building |
+| GitHub Actions | fresh iOS simulator + Android emulator | every PR + nightly schedule | free (public) / metered minutes (private) | regressions nobody remembered to check; "works on my machine" issues |
+| Firebase Test Lab | **real physical devices** (Pixel, Samsung, …) | weekly schedule via Actions | free daily quota | real-hardware quirks: vendor OS skins, weak CPUs, odd screens — with per-device video evidence |
+
+### 5.2 The running QA schedule (already live in the lab)
+
+| Cadence | What runs | Where |
+|---|---|---|
+| Every PR | contract checkers + AI review | GitHub gates |
+| Nightly 05:00 | full user journeys on iOS **and** Android, with pass/fail reports | cloud simulators |
+| Weekly Friday | entire checker suite + journeys on real devices | GitHub + Test Lab |
+
+This entire schedule uses tools the team already owns — no third-party QA platform subscription is needed: the test framework ships with Flutter, the scheduler/reporting is GitHub itself, and AI replaces the "no-code test authoring" value that commercial QA platforms charge for.
+
 ## 6. Safety Model
 
 1. Explicit permissions (allow/deny lists) per project
