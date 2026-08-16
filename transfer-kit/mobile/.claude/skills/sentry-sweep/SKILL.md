@@ -27,6 +27,10 @@ dedicated **"ArabGT Mobile App"** project — nowhere else.
      - Body: what happens, affected users count, event count,
        first/last seen, culprit file/function, Sentry link,
        suggested severity (Urgent only for crash/payment/security).
+     - End the body with a **"Sentry close-out"** section: the issue's
+       short ID (e.g. MOBILE-PROD-Q), the direct Sentry link, current
+       status, and the line: "Once the fix is verified in production,
+       resolve this issue in Sentry manually — AI never resolves."
      - Do NOT propose fixes in the card — problem only (team policy).
 4. Wait for all agents, then report: cards created, duplicates
    updated, and the board link.
