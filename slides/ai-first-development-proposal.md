@@ -25,6 +25,8 @@ Using AI is asking it to do a task. An **AI factory** is a system that asks *its
 |---|---|---|
 | Project memory (CLAUDE.md) | A file that teaches the AI the project's rules, conventions and red lines from second one | Consistent output that matches team standards **[verified in lab]** |
 | Permissions & Hooks | Hard enforcement: the system blocks forbidden operations *before* they run — not politeness, mechanism | The AI physically cannot touch what it must not touch **[verified in lab]** |
+| Parallel agents (worktrees) | Multiple AI agents work simultaneously on the same repository, each in an isolated working copy, merged back when done | Throughput scales with tasks, not with hours: five tasks take the time of the longest one, not the sum — with zero conflicts when tasks touch disjoint files **[verified in lab]** |
+| Orchestration | One session acts as the conductor: it prepares the isolated copies, dispatches an agent per task in parallel, waits for all, merges, and cleans up | One request replaces a day of coordination; the human states the tasks once **[verified in lab]** |
 | Spec-driven development | Vague requests return *numbered questions*, not silent guesses; every feature gets a contract + a neutral checker | Output quality equals contract quality; decisions stay human **[verified in lab]** |
 | Deterministic gate vs. AI review | A fast, repeatable check guards the merge button; an AI reviewer reads what the check cannot see | "Green ≠ healthy" — the pair covers both **[verified in lab]** |
 | MCP (Model Context Protocol) | A standard connector ("USB-C for AI") that plugs the AI into Sentry, Linear, PostHog, etc. | One protocol, every tool; works with any MCP-capable client — including Cursor |
