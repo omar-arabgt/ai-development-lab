@@ -159,3 +159,23 @@ Every piece is defined in the earlier sections — this one just composes them. 
 | Closing on merge | GitHub → Settings → Webhooks → event: pull_request → a small closing pipeline: ticket → Done, issue → Resolved | Code we write (a few lines) |
 
 **Honesty note for the presentation:** every segment of this chain has been run for real — Sentry→PR in one command, and Linear→spec→implementation→ticket-updates-itself — the final wiring through webhooks is Phase E of the transfer plan (needs the server).
+
+---
+
+# 9. Database Copies for Agents — Isolation at the Data Level
+
+## What you say
+
+"Just as every agent gets an isolated copy of the code (a worktree), it also gets an **isolated copy of the database**. Nightly, a snapshot of dev becomes a local template. For each task, a repo script spawns a copy from the template in seconds (Postgres template) and writes the DATABASE_URL into a .env inside the worktree — so each agent lands on its own database automatically. The autonomous Sentry pipeline does the same: it spawns its copy, reproduces the bug on realistic data, fixes, tests, opens the PR — and the copy is dropped at the end no matter what. **Shared dev is never touched** — and beyond habit there is a guard: any command aimed at the shared dev/staging/prod hosts is blocked before execution, so even if the AI forgets the rule, it cannot break it."
+
+## Where it's defined
+
+| Item | Exactly where | Who writes it |
+|---|---|---|
+| Nightly snapshot + template | cron on the server: `pg_dump` → `tpl_dev` template (+ a masking step if dev holds real user data) | Code we write — a few lines |
+| Spawning/dropping copies | `scripts/spawn_db.sh` and `scripts/despawn_db.sh` in the repo (createdb -T + a >24h orphan sweeper) | Code we write (~30 lines) |
+| Binding each worktree to its copy | a `.env` written by the spawn script inside the worktree — Django reads it locally | Automatic |
+| In the autonomous pipeline | a spawn line at the top + `trap despawn EXIT` (drops the copy even on failure) | Code we write |
+| The memory rule | CLAUDE.md: "never connect to shared databases — always spawn" | We write it |
+| The guard | a hook blocking any command containing the shared DB hostnames — only localhost and ephemeral copies allowed | Code we write |
+| Regular Django tests | isolated by default — pytest-django creates its own temporary test DB; clones are for reproducing bugs on realistic data | Default |
