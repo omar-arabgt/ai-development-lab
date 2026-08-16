@@ -1,6 +1,7 @@
-# Module 06, Lesson 3: QA on the server — the journey tests run
-# nightly on a cloud macOS machine with a real iOS simulator,
-# and can be fired on demand from the Actions tab (workflow_dispatch).
+# Module 06, Lesson 3: QA on the server — the user journeys run nightly
+# on BOTH platforms (iOS simulator + Android emulator), fully
+# deterministic (no AI involved), and publish a per-platform test
+# report on the run's summary page.
 name: Nightly QA
 
 on:
@@ -9,8 +10,8 @@ on:
   workflow_dispatch:        # the "Run workflow" button for demos
 
 jobs:
-  journey-tests:
-    name: User journeys on iOS simulator
+  ios-journeys:
+    name: Journeys on iOS simulator
     runs-on: macos-latest
     timeout-minutes: 30
     defaults:
@@ -38,17 +39,79 @@ jobs:
           xcrun simctl boot "$UDID"
           echo "UDID=$UDID" >> "$GITHUB_ENV"
 
-      - name: Run the booking journey
-        run: flutter test integration_test -d "$UDID"
+      - name: Run the journeys (JSON results)
+        run: flutter test integration_test -d "$UDID" --file-reporter "json:ios-results.json"
+
+      - name: Publish test report
+        if: always()
+        run: python3 ../../../.github/scripts/flutter_test_summary.py ios-results.json "iOS simulator"
 
       - name: Capture evidence screenshot
         if: always()
-        run: xcrun simctl io "$UDID" screenshot qa-final-state.png || true
+        run: xcrun simctl io "$UDID" screenshot ios-final-state.png || true
 
-      - name: Upload evidence
+      - name: Upload iOS evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: qa-evidence
-          path: 06-qa-mobile-testing/lesson-1-visual-qa/playground/qa-final-state.png
+          name: qa-evidence-ios
+          path: |
+            06-qa-mobile-testing/lesson-1-visual-qa/playground/ios-results.json
+            06-qa-mobile-testing/lesson-1-visual-qa/playground/ios-final-state.png
+          if-no-files-found: ignore
+
+  android-journeys:
+    name: Journeys on Android emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable KVM (hardware acceleration for the emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Generate the Android platform folder
+        working-directory: 06-qa-mobile-testing/lesson-1-visual-qa/playground
+        run: |
+          flutter create . --platforms=android
+          flutter pub get
+
+      - name: Run the journeys on the emulator (JSON results)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          working-directory: 06-qa-mobile-testing/lesson-1-visual-qa/playground
+          script: |
+            flutter test integration_test -d emulator-5554 --file-reporter "json:android-results.json"
+            adb exec-out screencap -p > android-final-state.png || true
+
+      - name: Publish test report
+        if: always()
+        working-directory: 06-qa-mobile-testing/lesson-1-visual-qa/playground
+        run: python3 ../../../.github/scripts/flutter_test_summary.py android-results.json "Android emulator (API 34)"
+
+      - name: Upload Android evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-evidence-android
+          path: |
+            06-qa-mobile-testing/lesson-1-visual-qa/playground/android-results.json
+            06-qa-mobile-testing/lesson-1-visual-qa/playground/android-final-state.png
           if-no-files-found: ignore
