@@ -1,0 +1,92 @@
+name: Bug Fix Agent
+
+on:
+  repository_dispatch:
+    types: [sentry_issue]
+  workflow_dispatch:
+    inputs:
+      short_id:
+        description: "Sentry short ID (e.g. BACKEND-PROD-1)"
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bug-fix-${{ github.event.client_payload.short_id || inputs.short_id }}
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check secrets are configured
+        env:
+          K1: ${{ secrets.CURSOR_API_KEY }}
+          K2: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          K3: ${{ secrets.LINEAR_API_KEY }}
+        run: |
+          MISSING=""
+          [ -z "$K1" ] && MISSING="$MISSING CURSOR_API_KEY"
+          [ -z "$K2" ] && MISSING="$MISSING SENTRY_AUTH_TOKEN"
+          [ -z "$K3" ] && MISSING="$MISSING LINEAR_API_KEY"
+          [ -n "$MISSING" ] && { echo "::error::Missing repo secrets:$MISSING"; exit 1; } || true
+
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Cursor CLI
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> $GITHUB_PATH
+
+      - name: Configure git identity
+        run: |
+          git config user.name "arabgt-bug-fix-agent"
+          git config user.email "ai-agent@arabgt.com"
+
+      - name: Fix the Sentry issue end-to-end
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          SHORT_ID: ${{ github.event.client_payload.short_id || inputs.short_id }}
+        run: |
+          agent -p "You are the bug-fix pipeline for this repo. Project laws live in
+          .cursor/rules/ — apply them strictly. Work on Sentry issue \$SHORT_ID
+          (org arabgt, project backend-prod). Sentry is READ-ONLY, always.
+
+          Steps, in order:
+          1. Read the full issue + latest event stack trace via the Sentry API
+             (curl, header 'Authorization: Bearer '\$SENTRY_AUTH_TOKEN).
+          2. Linear (POST https://api.linear.app/graphql, header
+             'Authorization: '\$LINEAR_API_KEY): search for an existing issue
+             referencing \$SHORT_ID. Reuse it, or create one in team ArabGT,
+             project 'ArabGT Mobile App', label 'Sentry' — problem-only body
+             ending with a 'Sentry close-out' section (short ID, link, and the
+             line: resolve in Sentry manually once verified — AI never resolves).
+             Move the ticket to 'In Progress'.
+          3. Create branch fix/\$SHORT_ID-<short-slug> from origin/dev.
+          4. Write a test that REPRODUCES the bug and fails first. Then fix the
+             root cause with a minimal diff matching the file's style.
+          5. Run the FULL 'python manage.py test' suite against the LOCAL stack (install requirements first; never any remote DB). All green or keep working — NEVER ship red. If you
+             cannot make it green, do NOT push: comment your findings on the
+             Linear ticket, leave it In Progress, and exit with failure.
+          6. Commit, push the branch, open ONE PR to dev via
+             'gh pr create --base dev' with the Sentry link, Linear ticket, root
+             cause, and fix summary in the description.
+          7. Comment on the Linear ticket: root cause, what changed (files),
+             test added, and the PR link. Then move the ticket to the status
+             named exactly 'In Review from AI' — if that status does not exist,
+             STOP and say so; never substitute another status.
+          Finish with a summary: ticket id, branch, PR URL, final status." \
+            -f --output-format text
