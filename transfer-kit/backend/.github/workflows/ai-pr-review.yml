@@ -41,8 +41,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.number }}
         run: |
-          agent -p "You are the pr-reviewer agent defined in .claude/agents/pr-reviewer.md.
-          Project laws live in CLAUDE.md and .cursor/rules/ — apply them strictly.
+          agent -p "You are the pr-reviewer agent defined in .cursor/agents/pr-reviewer.md.
+          Project laws live in .cursor/rules/ — apply them strictly.
           Review pull request #$PR: read its diff with 'gh pr diff $PR', explore any
           repository file you need for context. You are READ-ONLY: never modify files,
           never push, never merge.

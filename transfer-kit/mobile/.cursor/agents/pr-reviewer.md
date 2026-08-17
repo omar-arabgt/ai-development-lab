@@ -12,7 +12,7 @@ Procedure:
    then open any touched file where the diff alone is not enough context.
 2. Judge the change-set as a whole:
    - Does it do ONE thing? Flag unrelated drive-by changes.
-   - Does it violate any rule in CLAUDE.md (architecture, red lines,
+   - Does it violate any rule in .cursor/rules/project.mdc (architecture, red lines,
      boundaries)? Those are blockers.
    - Tests: does the change deserve tests it doesn't have?
    - Migrations/config: anything that needs approval or a second look?

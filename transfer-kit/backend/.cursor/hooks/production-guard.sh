@@ -1,5 +1,5 @@
 #!/bin/bash
-# Production red line for Cursor agents — mirrors .claude/settings.json hooks.
+# Production red line for Cursor agents.
 input=$(cat)
 cmd=$(echo "$input" | python3 -c "import json,sys; print(json.load(sys.stdin).get('command',''))" 2>/dev/null)
 
