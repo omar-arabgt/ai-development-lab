@@ -40,11 +40,23 @@ jobs:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.number }}
+          EVENT_ACTION: ${{ github.event.action }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
         run: |
           agent -p "You are the pr-reviewer agent defined in .cursor/agents/pr-reviewer.md.
           Project laws live in .cursor/rules/ — apply them strictly.
-          Review pull request #$PR: read its diff with 'gh pr diff $PR', explore any
-          repository file you need for context. You are READ-ONLY: never modify files,
+          Event action: $EVENT_ACTION.
+          - If it is 'synchronize' (a new push to an already-open PR): this is an
+            INCREMENTAL review. Review in detail ONLY the new changes
+            ('git diff $BEFORE_SHA..$AFTER_SHA'); then read your own previous
+            review comments ('gh pr view $PR --comments') and check whether each
+            earlier finding was addressed. Do NOT repeat old notes about
+            unchanged code.
+          - Otherwise (opened/reopened): review the FULL diff ('gh pr diff $PR').
+          Explore any repository file you need for context.
+          Your VERDICT always reflects the WHOLE PR state: previously flagged
+          unresolved problems keep it NOT READY even if the new push is clean. You are READ-ONLY: never modify files,
           never push, never merge.
           Then: 1) post ONE review comment on the PR via
           'gh pr comment $PR --body-file <file you write>' summarizing findings
