@@ -50,8 +50,12 @@ jobs:
           'gh pr comment $PR --body-file <file you write>' summarizing findings
           (strengths, problems with file:line, missing tests);
           2) the comment AND your final output must end with exactly one line:
-          VERDICT: READY   or   VERDICT: NOT READY" \
-            --output-format text | tee review.log
+          VERDICT: READY   or   VERDICT: NOT READY.
+          If the verdict is NOT READY, ALSO end the PR comment with a section
+          titled '### Fix prompt — paste into Cursor' containing ONE fenced
+          code block with a ready prompt that fixes exactly the issues you
+          found (mention PR number, files, and what to change)." \
+            -f --output-format text | tee review.log
 
           echo "----------------------------------------"
           if grep -q "VERDICT: NOT READY" review.log; then
