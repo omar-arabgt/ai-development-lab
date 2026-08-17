@@ -21,6 +21,17 @@ jobs:
   fix:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: localroot
+          MYSQL_DATABASE: app_local
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -plocalroot"
+          --health-interval 5s --health-timeout 3s --health-retries 20
     steps:
       - name: Check secrets are configured
         env:
@@ -36,12 +47,31 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: staging
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Clone staging database into local MySQL (deterministic step, not the agent)
+        env:
+          H: ${{ secrets.STAGING_DB_HOST }}
+          U: ${{ secrets.STAGING_DB_USER }}
+          P: ${{ secrets.STAGING_DB_PASS }}
+          N: ${{ secrets.STAGING_DB_NAME }}
+        run: |
+          if [ -z "$H" ] || [ -z "$U" ] || [ -z "$P" ] || [ -z "$N" ]; then
+            echo "::warning::STAGING_DB_* secrets not set — skipping DB clone; the agent will use the project's default local/test DB instead."
+            exit 0
+          fi
+          sudo apt-get -qq update && sudo apt-get -qq install -y mysql-client
+          echo "Dumping staging DB (single transaction, read-only)..."
+          mysqldump --single-transaction --quick --no-tablespaces \
+            -h "$H" -u "$U" -p"$P" "$N" > /tmp/staging_dump.sql
+          echo "Loading into local MySQL copy (app_local)..."
+          mysql -h 127.0.0.1 -uroot -plocalroot app_local < /tmp/staging_dump.sql
+          echo "Local copy ready: 127.0.0.1:3306 / app_local"
 
       - name: Install Cursor CLI
         run: |
@@ -75,14 +105,19 @@ jobs:
              ending with a 'Sentry close-out' section (short ID, link, and the
              line: resolve in Sentry manually once verified — AI never resolves).
              Move the ticket to 'In Progress'.
-          3. Create branch fix/\$SHORT_ID-<short-slug> from origin/dev.
+          3. Create branch fix/\$SHORT_ID-<short-slug> from origin/staging.
           4. Write a test that REPRODUCES the bug and fails first. Then fix the
              root cause with a minimal diff matching the file's style.
-          5. Run the FULL 'python manage.py test' suite against the LOCAL stack (install requirements first; never any remote DB). All green or keep working — NEVER ship red. If you
+          5. Run the FULL 'python manage.py test' suite against the LOCAL stack (install requirements first). A LOCAL MySQL 8 copy of the
+             staging database is ready at 127.0.0.1:3306, database app_local,
+             user root, password localroot — point the LOCAL settings at it for
+             reproducing and testing. HARD RULE: never connect to any remote
+             database; the local copy is the only database you touch. All green or keep working — NEVER ship red. If you
              cannot make it green, do NOT push: comment your findings on the
              Linear ticket, leave it In Progress, and exit with failure.
-          6. Commit, push the branch, open ONE PR to dev via
-             'gh pr create --base dev' with the Sentry link, Linear ticket, root
+          6. Commit, push the branch, open ONE PR to staging via
+             'gh pr create --base staging' (hotfix path; note in the PR
+             description that it must be ported back to dev after release) with the Sentry link, Linear ticket, root
              cause, and fix summary in the description.
           7. Comment on the Linear ticket: root cause, what changed (files),
              test added, and the PR link. Then move the ticket to the status
