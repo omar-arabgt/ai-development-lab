@@ -30,7 +30,9 @@
       "Read(**/secrets*)",
       "Bash(python manage.py shell*)",
       "Bash(python manage.py dbshell*)",
-      "Bash(python manage.py flush*)"
+      "Bash(python manage.py flush*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)"
     ]
   },
   "hooks": {
@@ -40,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | python3 -c \"import json,sys; print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null || echo \"$INPUT\"); if echo \"$CMD\" | grep -qiE 'DATABASE_URL=|--settings[= ][^ ]*(prod|staging)|(psql|pg_dump|pg_restore|mysql|mysqldump) .*(prod|staging|arabgt\\.com)|manage\\.py .*(--settings[= ][^ ]*(prod|staging))'; then echo 'BLOCKED by production red line: this command points at a production/staging database or settings. AI work targets the local docker-compose stack only.' >&2; exit 2; fi; exit 0",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | python3 -c \"import json,sys; print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null || echo \"$INPUT\"); if echo \"$CMD\" | grep -qiE 'DATABASE_URL=|--settings[= ][^ ]*(prod|staging)|(psql|pg_dump|pg_restore|mysql|mysqldump) .*(prod|staging|arabgt\\.com)|manage\\.py .*(--settings[= ][^ ]*(prod|staging))|git push .*(--force|-f( |$))|manage\\.py (shell|dbshell|flush)'; then echo 'BLOCKED by production red line: this command points at a production/staging database or settings. AI work targets the local docker-compose stack only.' >&2; exit 2; fi; exit 0",
             "statusMessage": "Red line: checking command does not touch production/staging data"
           }
         ]

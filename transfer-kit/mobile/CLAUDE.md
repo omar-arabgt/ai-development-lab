@@ -100,3 +100,13 @@ These features deviate from the standard anatomy for historical/practical reason
 - When AI finishes a fix (PR opened), move the ticket to the status named exactly
   **"In Review from AI"** — a human reviews after AI. If that status is ever missing,
   stop and ask; never substitute another status.
+
+## Parallel work (multi-agent)
+
+- Before dispatching parallel agents, map the files each task will touch.
+  **No two agents may ever work on the same file** — overlapping tasks go to
+  ONE agent sequentially instead.
+- One git worktree + one branch per agent (`fix/<ticket-id>-<slug>` off `dev`).
+  Never run parallel agents inside the main checkout.
+- Each agent runs the FULL test suite before opening its PR. One task = one PR.
+- When done, worktrees are removed (`git worktree remove`); branches live on in PRs.
