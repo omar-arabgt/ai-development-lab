@@ -3,26 +3,19 @@ name: Promotion Gate
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
-    branches: [qa, staging, production]
+    branches: [production]
 
 jobs:
   gate:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Enforce promotion chain (dev -> qa -> staging -> production)
+      - name: production only accepts staging
         env:
-          BASE: ${{ github.base_ref }}
           HEAD: ${{ github.head_ref }}
         run: |
-          case "$BASE" in
-            production) ALLOWED=staging ;;
-            staging)    ALLOWED=qa ;;
-            qa)         ALLOWED=dev ;;
-            *) echo "No gate for base '$BASE'"; exit 0 ;;
-          esac
-          if [ "$HEAD" != "$ALLOWED" ]; then
-            echo "::error::PRs into '$BASE' may ONLY come from '$ALLOWED' (this one comes from '$HEAD'). Promotion chain: dev -> qa -> staging -> production."
+          if [ "$HEAD" != "staging" ]; then
+            echo "::error::PRs into 'production' may ONLY come from 'staging' (this one comes from '$HEAD')."
             exit 1
           fi
-          echo "OK: '$HEAD' -> '$BASE' follows the promotion chain."
+          echo "OK: staging -> production."
