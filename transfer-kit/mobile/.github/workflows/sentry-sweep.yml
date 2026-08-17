@@ -1,0 +1,61 @@
+name: Sentry Sweep
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "How many top issues to sweep"
+        default: "6"
+  schedule:
+    - cron: "0 4 * * *"   # 07:00 Amman, daily
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check secrets are configured
+        env:
+          K1: ${{ secrets.CURSOR_API_KEY }}
+          K2: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          K3: ${{ secrets.LINEAR_API_KEY }}
+        run: |
+          MISSING=""
+          [ -z "$K1" ] && MISSING="$MISSING CURSOR_API_KEY"
+          [ -z "$K2" ] && MISSING="$MISSING SENTRY_AUTH_TOKEN"
+          [ -z "$K3" ] && MISSING="$MISSING LINEAR_API_KEY"
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing repo secrets:$MISSING"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Install Cursor CLI
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> $GITHUB_PATH
+
+      - name: Sweep Sentry into Linear
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LIMIT: ${{ inputs.limit || '6' }}
+        run: |
+          agent -p "Follow the sweep policy in .cursor/commands/sentry-sweep.md
+          EXACTLY (destination project, Sentry label, dedupe-first, problem-only
+          bodies, the 'Sentry close-out' section, Sentry strictly read-only).
+          You are in CI without MCP — use the plain APIs via curl instead:
+          - Sentry (READ ONLY): GET
+            https://sentry.io/api/0/projects/arabgt/mobile-prod/issues/?query=is:unresolved&sort=freq
+            with header 'Authorization: Bearer '\$SENTRY_AUTH_TOKEN — take the top \$LIMIT.
+          - Linear: POST https://api.linear.app/graphql with header
+            'Authorization: '\$LINEAR_API_KEY — search existing issues for each
+            Sentry short ID to dedupe, then create missing ones (team ArabGT,
+            project 'ArabGT Mobile App', label 'Sentry', state Todo).
+          Finish with a summary: created / updated / skipped, with identifiers." \
+            -f --output-format text
