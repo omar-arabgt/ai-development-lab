@@ -1,93 +1,152 @@
-# دليل الديمو — وين كل إشي وكيف بتجربه قدام أمجد
+# دليل الديمو الكامل — وين كل إشي، كيف بتجربه، وشو بتقول
 
-*(محدث 2026-08-17 مساءً — بعد تركيب v2 عالريبوهين الحقيقيين)*
+*(محدث 2026-08-17 — بعد تثبيت الحزمة الكاملة على برانشاتك `feature/ai-foundations` بالريبوهين)*
 
 ---
 
-## 1. الوضع الحالي — شو وين
+## 1. الوضع الحالي — شو وين بالضبط
 
-| الريبو | البرانش | الحالة |
+| الريبو | البرانش المعتمد | شو فيه |
 |---|---|---|
-| **ArabGT-Mobile** | `feature/ai-foundations-v2` | ✅ كل شي مـ committed **محلياً** (مش مدفوع — قرارك) — الأساس المجرب + الإضافات الأدفانس، 24 ملف |
-| **arabgt-backend** | `ai-foundations` (مدفوع) + `feature/ai-advanced` (محلي) | ✅ الأساس مدفوع على origin؛ الإضافات الأدفانس محلية فوقه |
+| **ArabGT-Mobile** | `feature/ai-foundations` | commit واحد: e19bd1a3 — الحزمة كاملة (24 ملف) |
+| **arabgt-backend** | `feature/ai-foundations` | 3 commits: الحزمة + إصلاح gitignore + تنظيف |
 
-⚠️ **تنبيهين قبل الميتنغ:**
-1. برانش `fix/AGT-511-image-network-noise` (موبايل) فيه commit باسم "--" لجّن نسخ حراس **أضعف** بالغلط — لازم ينشال قبل دمج الـ PR تبعه (بشيله بأمر واحد لما تعطيني إشارة)
-2. برانش `ai-foundations` القديم (موبايل، مدفوع) صار **متجاوز** — v2 هو المعتمد؛ بعد العرض منسكر القديم
+**كلها commits محلية — ما في push** لحد ما تفرجي أمجد وتقرر.
+
+**الحزمة بكل ريبو:**
+- **الذاكرة**: `CLAUDE.md` (لـ Claude) + `.cursor/rules/project.mdc` (لـ Cursor) — نفس المحتوى، مصدر حقيقة واحد
+- **الصلاحيات**: `.claude/settings.json` — قوائم allow / ask / deny
+- **الحراس**: `.cursor/hooks.json` + سكربتين بـ `.cursor/hooks/` (لـ Cursor)، وhooks جوّا `.claude/settings.json` (لـ Claude) — **مفحوصين 21/21 بعد التثبيت**
+- **الأوامر (skills)**: 5 بالأداتين — `linear-ticket`، `sentry-sweep`، `daily-report` 🆕، `release-check` 🆕، `parallel-tasks` 🆕
+- **الوكلاء (agents)**: موبايل 3 (flutter-reviewer، qa-engineer، pr-reviewer) — باكند 5 (django، api-qa، web، performance، pr)
+- **وصلات MCP**: `.mcp.json` + `.cursor/mcp.json` (Sentry + Linear)
+
+**برانشات صارت زايدة** (محتواها كله عند برانشاتك): `feature/ai-foundations-v2` بالموبايل، و`feature/ai-advanced` + `ai-foundations` القديم بالباكند — منمسحهم بعد العرض.
+
+⚠️ **تنبيه واحد باقي**: برانش `fix/AGT-511` (موبايل) فيه commit باسم "--" لجّن نسخ حراس قديمة — لازم ينشال قبل دمج الـ PR تبعه (أمر واحد، بإشارتك).
 
 ---
 
-## 2. خريطة الطبقات — الملف ووين بتشوفه
+## 2. خريطة "وين بشوف كل إشي" — بالتفصيل
 
-| الطبقة | المسار بالريبو | وين بتشوفها بالواجهة |
+| الطبقة | الملف | كيف بتشوفها شغالة | ليش هيك مصممة |
+|---|---|---|---|
+| **Rules** | `.cursor/rules/project.mdc` | ما بتشوفها — بتشوف **أثرها**: الـ AI بيعرف مشروعك من أول سؤال بلا ما تشرحله | `alwaysApply: true` = بتنحقن بسياق كل محادثة تلقائياً؛ عشان هيك ما في زر "شغّل الذاكرة" |
+| **Permissions** | `.claude/settings.json` | أول ما يطلب push أو PR بتشوف نافذة موافقة؛ والـ deny بينرفض صامت | القرارات المصيرية إلزامياً بتمرق عليك — مش أدب من الـ AI، إعداد |
+| **Hooks** | `.cursor/hooks.json` + `.cursor/hooks/*.sh` | رسالة **BLOCKED** حمرا لحظة ما يحاول ينفذ أمر ممنوع | بيركض **قبل** التنفيذ وبيرفض بالقوة؛ `failClosed` = لو الحارس نفسه تعطل، الرفض تلقائي |
+| **Skills** | `.cursor/commands/*.md` | اكتب `/` بحقل الكتابة — القائمة بتطلع | ملفات بالريبو: زميلك بيعمل pull بيلاقيها عنده — هيك الخبرة بتتشارك |
+| **Agents** | `.claude/agents/*.md` | بتناديهم بالاسم: "Use the pr-reviewer agent on PR #X" | كل واحد دور ضيق وصلاحيات على قده — المراجع قراءة فقط فيزيائياً |
+| **MCP** | `.mcp.json` / `.cursor/mcp.json` | Customize → MCPs (لازم Enabled + Login) — والنتائج بالمحادثة | التعريف بالريبو بس المصادقة شخصية لكل مستخدم — عشان هيك كل واحد بيعمل Login مرة |
+| **قانون التوازي** | قسم "Parallel work" بالذاكرة | أي multi-agent بيلتزم فيه بلا ما تذكره | قانون مش أداة — فمكانه الـ rules اللي بتنحقن دايماً، مش command بتناديه |
+
+---
+
+## 3. سيناريو الديمو — 15 دقيقة، خطوة خطوة بالشرح الكامل
+
+> **التجهيز قبل الميتنغ:** افتح لوحة Cursor → workspace **arabgt-mobile** → **بدّل البرانش بالمنتقى لـ `feature/ai-foundations`** (مهم! الملفات عايشة هناك بس) → تأكد إنه sentry وlinear بحالة Enabled + متسجل دخول (Customize → MCPs).
+
+---
+
+### ① الذاكرة — "بيعرف مشروعنا" (دقيقتين)
+
+**الصق:** `How do I add a new screen in this app?`
+
+**شو بيصير من تحت:** Cursor حقن `project.mdc` بسياق المحادثة قبل ما يقرأ سؤالك — فالجواب بيجي من قوانين مشروعكم مش من معرفة عامة.
+
+**المتوقع تشوفه:** checklist بأسماء ملفاتكم: constant بـ `arabgt_routes.dart` ← GetPage + binding بـ `arabgt_navigator.dart` ← فتح بـ `ArabgtGo.toNamed` — مع تحذير من تقليد مجلدات الاستثناء (common, casting...).
+
+**الجملة لأمجد:** *"ولا حدا علّمه إشي بهالمحادثة — هاي ذاكرة المشروع، ملف بالريبو بيقرأه تلقائياً. زميل جديد بياخد نفس المعرفة يوم أول دوام."*
+
+**لو غلط:** لو أجاب جواب Flutter عام (Get.toNamed مثلاً) — يعني البرانش غلط بالمنتقى؛ بدّله وأعد.
+
+---
+
+### ② الحراس — "المنع بالقوة" (دقيقة ونص — أقوى لحظة بالعرض)
+
+**الصق:** `Run this command: flutter run --target lib/main_prod.dart`
+
+**شو بيصير من تحت:** قبل ما ينفذ، Cursor مرر الأمر لـ `production-guard.sh` — السكربت لقى `main_prod` بالنص فرجّع `"permission": "deny"` — الأمر **ما ركض أصلاً**.
+
+**المتوقع:** 🛑 رسالة BLOCKED: "production builds, entrypoints, and store uploads are human-only".
+
+**بعدها فوراً الصق:** `Run: git push --force origin dev`
+
+**المتوقع:** 🛑 BLOCKED كمان (الحارس الجديد — إعادة كتابة التاريخ human-only).
+
+**الجملة لأمجد:** *"هاد مش أدب من الـ AI — هاد حارس بيفحص كل أمر قبل التنفيذ. حتى لو الـ AI انخدع أو غلط، الأمر الممنوع ما بينفذ فيزيائياً. وعنا قصة: الحارس هاد صدّ الـ AI اللي كتبه — مرتين."*
+
+---
+
+### ③ الأوامر المشتركة — "الخبرة صارت ملفات" (نص دقيقة)
+
+**اكتب:** `/` (بس السلاش)
+
+**المتوقع:** قائمة فيها: `daily-report`، `release-check`، `sentry-sweep`، `linear-ticket`، `parallel-tasks`.
+
+**الجملة:** *"كل أمر من هدول ملف بالريبو مكتوب فيه الإجراء وسياساته — منها 'إذا مش متأكد وقّف واسأل، ممنوع تخمن'. أي زميل بيعمل pull بيلاقي هالقائمة جاهزة عنده — بدون تركيب إشي."*
+
+---
+
+### ④ التقرير اليومي الحي — "Sentry بالعربي" (3 دقايق)
+
+**اختار من القائمة:** `/daily-report`
+
+**شو بيصير من تحت:** بيسحب من Sentry (مشروع `mobile-prod` تبع الشركة — الوجهة محفورة بالأمر نفسه) أخطاء آخر 24 ساعة: الجديد، الراجع، والأكثر تكراراً — وبيقارنها مع بورد Linear مين إله بطاقة ومين لا.
+
+**المتوقع:** تقرير markdown: سطر عناوين (X new / Y regressed / Z untracked) + جدول + فقرة نمط ملحوظ. ولو عينة صغيرة بيقول "early signal — not a conclusion".
+
+**الجملة:** *"هاد التقرير بيقدر يوصلنا كل صبح أوتوماتيكياً قبل الدوام — وهو قراءة فقط: ما بيغير إشي بـ Sentry ولا بيفتح تذاكر لحاله."*
+
+---
+
+### ⑤ القصة الكبيرة — الباغات الثلاثة (4 دقايق)
+
+**افتحهم جاهزين مسبقاً بتابات:**
+- الـ PRs الثلاثة: [#544](https://github.com/ArabGT-Platform/ArabGT-Mobile/pull/544) • [#545](https://github.com/ArabGT-Platform/ArabGT-Mobile/pull/545) • [#546](https://github.com/ArabGT-Platform/ArabGT-Mobile/pull/546)
+- بورد Linear: بطاقات بحالة **In Review from AI** وعليها ليبل **Sentry**
+- ترمينال: `git worktree list` (لو الـ worktrees لسا موجودة)
+
+**احكي القصة بالتسلسل:** *"هدول 3 أخطاء حقيقية من production: سحبهم الـ AI من Sentry بالترتيب حسب التكرار، فتحلهم تذاكر بـ Linear (وواحدة لقاها موجودة فما كررها — بيفحص التكرار أول)، وبعدين 3 وكلاء اشتغلوا بالتوازي — كل واحد بمجلد معزول (git worktree) بحيث ولا ملف مشترك بيناتهم. كل وكيل: كتب تست بيفشل بيثبت الباغ، صلّح، شغّل كل الفحوصات، وفتح PR على dev. والتذكرة انتقلت لحالة 'In Review from AI' — يعني الـ AI خلص، الدور صار على إنسان. الـ AI بيقدر يفتح PR — ما بيقدر يدمجه أبداً."*
+
+**وبآخر كل بطاقة Linear:** قسم Sentry close-out — الرابط جاهز عشان الإنسان يعمل Resolve بعد التحقق. *"حتى إغلاق الخطأ بـ Sentry — قرار بشري."*
+
+---
+
+### ⑥ الختام — بوابة الإصدار (دقيقتين)
+
+**اختار:** `/release-check`
+
+**شو بيصير من تحت:** بيشغل analyze + كل الفحوصات + بيفحص إنه الشغل على برانش من dev + بيمسح الـ diff: ممنوع يكون لامس `lib/environments/prod/` أو ملفات التواقيع.
+
+**المتوقع:** حكم صريح **GO** أو **NO-GO** مع الأدلة (وNO-GO ممنوع يتلطف — قانون مكتوب).
+
+**الجملة الختامية:** *"وهاد الفحص نفسه منحطه شرط دمج إجباري على GitHub — فحص أحمر يعني زر الدمج معطل، للبشر وللـ AI بالتساوي. الخلاصة: الرتيب صار أوتوماتيكي بحدود مفروضة تقنياً — والبشر بيصرفوا وقتهم عالقرارات بس."*
+
+---
+
+## 4. خطة الطوارئ
+
+**قبل الميتنغ بساعة — سكرينشوت لكل وحدة:**
+1. جواب سؤال الذاكرة ①
+2. رسالتي BLOCKED ②
+3. قائمة الـ `/` ③
+4. تقرير daily-report ④
+5. الـ PRs + بورد Linear + worktree list ⑤
+6. حكم pr-reviewer (READY ×3 + ترتيب الدمج)
+
+**لو وقع النت أو علقت الجلسة:** كمّل بالسكرينشوتات + الدفتر العربي (`cursor-explainer.md`) للشرح + وثيقة Word الإنجليزية (`ai-first-technical-brief.docx`) للتوزيع.
+
+**لو سأل سؤال تقني عميق:** جوابه غالباً بفصول الدفتر (12 فصل) — والأسئلة المتوقعة مجاوب عليها جوّا كل فصل ("شو بيمنع الـ AI يعدل الحارس؟"، "ليش مش Bugbot؟"، "قديش بتكلف؟").
+
+---
+
+## 5. بعد موافقة أمجد — الترتيب
+
+| # | الخطوة | مين |
 |---|---|---|
-| **Rules** (الذاكرة) | `CLAUDE.md` + `.cursor/rules/project.mdc` | بتشتغل خفي بكل محادثة — بتثبتها بسؤال (ديمو 1) |
-| **Permissions** | `.claude/settings.json` (allow/ask/deny) | لما يطلب push بتشوف طلب الموافقة |
-| **Hooks** (الحراس) | `.cursor/hooks.json` + `.cursor/hooks/*.sh` و`.claude/settings.json` | رسالة BLOCKED حمرا بالمحادثة (ديمو 2) |
-| **Skills/Commands** | `.claude/skills/*/SKILL.md` + `.cursor/commands/*.md` | قائمة الـ `/` باللوحة والـ IDE (ديمو 4) |
-| **Subagents** | `.claude/agents/*.md` | بتناديهم بالاسم: "Use the pr-reviewer agent..." |
-| **MCP** (Sentry/Linear) | `.mcp.json` + `.cursor/mcp.json` | تبويب MCPs بالإعدادات + النتائج بالمحادثة |
-| **قانون التوازي** | قسم "Parallel work" بالذاكرة + `/parallel-tasks` | أي multi-agent بيلتزم فيه تلقائياً |
-
-**الـ skills الموجودة (بالأداتين):** `linear-ticket` • `sentry-sweep` • `daily-report` 🆕 • `release-check` 🆕 • `parallel-tasks` 🆕 (+`parallel-tasks` skill عند Claude من قبل)
-
-**الـ agents:** موبايل: flutter-reviewer، qa-engineer، pr-reviewer — باكند: django-reviewer، api-qa، web-reviewer، performance-reviewer، pr-reviewer
-
----
-
-## 3. سيناريو الديمو — 15 دقيقة بالترتيب
-
-> كله من لوحة Cursor، الـ workspace: **arabgt-mobile** على برانش **feature/ai-foundations-v2**
-
-**① الذاكرة (دقيقتين)** — الصق:
-`How do I add a new screen in this app?`
-✔ المتوقع: checklist بأسماء ملفاتكم (arabgt_routes → arabgt_navigator → ArabgtGo) + تحذير مجلدات الاستثناء. الجملة لأمجد: *"ما حدا علّمه بالمحادثة — قرأ ذاكرة المشروع"*
-
-**② الحارس لايف (دقيقة — الأقوى)** — الصق:
-`Run this command: flutter run --target lib/main_prod.dart`
-✔ المتوقع: 🛑 BLOCKED برسالة production red line. بعدها مباشرة:
-`Run: git push --force origin dev`
-✔ المتوقع: 🛑 BLOCKED (الحارس الجديد). الجملة: *"مش أدب — قوة. حتى لو الـ AI انخدع، الأمر ما بينفذ"*
-
-**③ قائمة الأوامر (نص دقيقة)** — اكتب `/`
-✔ المتوقع: daily-report, release-check, sentry-sweep, linear-ticket, parallel-tasks. الجملة: *"خبرة الفريق صارت ملفات — أي زميل بيعمل pull بيلاقيها"*
-
-**④ التقرير اليومي الحي (3 دقايق)** — اكتب:
-`/daily-report`
-✔ المتوقع: تقرير markdown من Sentry الشركة الفعلي: جديد/راجع/غير متتبع + جدول + ربط مع Linear. الجملة: *"هاد بيقدر يوصلكم كل صبح أوتوماتيكياً"*
-
-**⑤ القصة الكاملة — الباغات الثلاثة (4 دقايق)** — افتح جاهز مسبقاً:
-- صفحة PRs: [#544](https://github.com/ArabGT-Platform/ArabGT-Mobile/pull/544) [#545](https://github.com/ArabGT-Platform/ArabGT-Mobile/pull/545) [#546](https://github.com/ArabGT-Platform/ArabGT-Mobile/pull/546)
-- بورد Linear (بطاقات "In Review from AI" بليبل Sentry)
-- ترمينال: `git worktree list`
-الجملة: *"3 أخطاء production حقيقية، انحلوا بالتوازي بجلسة وحدة — تست بيفشل أول، حل، فحوصات، PR — والدمج بضل قرار بشري"*
-
-**⑥ الختام (دقيقتين)** — `/release-check`
-✔ المتوقع: بيركض analyze + tests + فحص المسارات الممنوعة وبيعطي GO/NO-GO. الجملة: *"وهاد نفسه بيصير شرط دمج إجباري على GitHub — أحمر = زر الدمج معطل"*
-
----
-
-## 4. خطة الطوارئ (fallback)
-
-**قبل الميتنغ بساعة، خذ سكرينشوتات لـ:**
-1. جواب سؤال الذاكرة (①)
-2. رسالتي BLOCKED (②)
-3. قائمة الـ `/` (③)
-4. تقرير `/daily-report` (④)
-5. صفحة الـ 3 PRs + بورد Linear + `git worktree list` (⑤)
-6. حكم pr-reviewer على الـ PRs (READY + ترتيب الدمج)
-
-لو النت خذل أو الجلسة علقت: بتكمل العرض بالسكرينشوتات + الدفتر العربي (`cursor-explainer.md`) + وثيقة Word الإنجليزية (`ai-first-technical-brief.docx`).
-
----
-
-## 5. شو بعده معلق (بعد موافقة أمجد)
-
-| الخطوة | مين |
-|---|---|
-| push للبرانشين + فتح PRs للأساس | انت (الأوامر جاهزة عندي) |
-| تنظيف commit "--" من fix/AGT-511 | أنا، بإشارتك |
-| Branch protection + required checks على GitHub الشركة | أدمن الـ org |
-| مفتاح Cursor API كـ secret + workflow المراجع على كل PR | انت + أدمن |
-| نقل nightly/weekly QA workflows + secret الـ Test Lab | أنا معك |
-| PostHog للشركة (لو منقرر) + التقرير الصباحي الموحد | مرحلة ثانية |
+| 1 | push لبرانشي `feature/ai-foundations` + فتح PRs | انت (الأوامر جاهزة) |
+| 2 | تنظيف commit "--" من fix/AGT-511 + مسح البرانشات الزايدة | أنا، بإشارتك |
+| 3 | Branch protection + required checks على ريبوهات الشركة | أدمن الـ org |
+| 4 | مفتاح Cursor API كـ secret + workflow المراجع على كل PR | انت + أدمن |
+| 5 | نقل nightly/weekly QA + secret الـ FIREBASE_SERVICE_ACCOUNT | أنا معك |
+| 6 | Patrol لرحلات الفحص + PostHog + التقرير الصباحي الموحد | مرحلة ثانية |
